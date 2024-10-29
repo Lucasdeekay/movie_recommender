@@ -6,8 +6,24 @@ import random
 random = random.Random()
 
 
-# Function to calculate the hybridized recommendation score for a user and movie
 def hybrid_recommendation_score(user_id, movie_id, user_item_matrix):
+    """
+    Calculate the hybridized recommendation score for a user and movie.
+
+    This function computes a hybrid recommendation score based on the similarity
+    between a user's ratings and the ratings of a specific movie across all users.
+
+    Parameters:
+    user_id (int): The ID of the user for whom the recommendation is being calculated.
+    movie_id (int): The ID of the movie for which the recommendation score is being calculated.
+    user_item_matrix (pandas.DataFrame): A matrix of user ratings for movies, where rows
+                                         represent users and columns represent movies.
+
+    Returns:
+    float: The hybrid recommendation score. A higher score indicates a stronger
+           recommendation. If there are no common movies between the user and the
+           movie's ratings, the function returns 0.0.
+    """
     user_ratings = user_item_matrix.loc[user_id].dropna()
     movie_ratings = user_item_matrix[movie_id].dropna()
 
@@ -28,8 +44,26 @@ def hybrid_recommendation_score(user_id, movie_id, user_item_matrix):
     return hybrid_score
 
 
-# Function to recommend top N movies for a user using the hybridized algorithm
 def hybrid_recommend_movies(user_id, user_item_matrix, N=20):
+    """
+    Recommends top N movies for a user using a hybrid recommendation algorithm.
+
+    This function calculates hybrid recommendation scores for all movies,
+    sorts them, excludes movies the user has already rated, and then
+    randomly selects 10 movies from the top N recommendations.
+
+    Parameters:
+    user_id (int): The ID of the user for whom recommendations are being made.
+    user_item_matrix (pandas.DataFrame): A matrix of user ratings for movies,
+                                         where rows represent users and columns
+                                         represent movies.
+    N (int, optional): The number of top recommendations to consider before
+                       random selection. Defaults to 20.
+
+    Returns:
+    list: A list of 10 randomly selected movie titles from the top N
+          recommendations, based on the hybrid recommendation algorithm.
+    """
     # Calculate hybrid recommendation scores for all movies
     movie_ids = user_item_matrix.columns
     hybrid_scores = [hybrid_recommendation_score(user_id, movie_id, user_item_matrix) for movie_id in movie_ids]
@@ -59,6 +93,23 @@ def hybrid_recommend_movies(user_id, user_item_matrix, N=20):
 
 
 def make_hybrid_recommendations(user_id):
+    """
+    Generate hybrid movie recommendations for a given user.
+
+    This function loads a pre-trained hybrid recommendation model,
+    and uses it to generate movie recommendations for the specified user.
+
+    Parameters:
+    user_id (int): The ID of the user for whom recommendations are being generated.
+
+    Returns:
+    list: A list of movie titles recommended for the user. The list contains
+          the top 20 recommendations based on the hybrid recommendation model.
+
+    Note:
+    This function assumes that the 'user_item_matrix' is available in the global scope,
+    and that the hybrid model file 'hybrid_model.joblib' exists in the 'models' directory.
+    """
     # Load the hybrid model
     loaded_model = joblib.load('models/hybrid_model.joblib')
     hybrid_recommendation_score_loaded, hybrid_recommend_movies_loaded = loaded_model
